@@ -1,38 +1,77 @@
+obs: 
+
+é um trabalho feito com edge impulse, windows e arduino ide
+
+link para o projeto no edge impulse: https://studio.edgeimpulse.com/public/841193/live
+link para configuração do esp32 para o edge impulse pra caso a pessoa deseje fazer testes em tempo real: https://docs.edgeimpulse.com/hardware/boards/espressif-esp32
+link de um tutorial de como funciona o sensor de ecg e como funciona a ecg num geral: https://learn.sparkfun.com/tutorials/ad8232-heart-rate-monitor-hookup-guide/all
+link para baixar o dataset usado: https://www.kaggle.com/datasets/shayanfazeli/heartbeat?resource=download
+
+Diante da necessidade de identificar anomalias cardíacas com rapidez e precisão em ambientes clínicos e de baixo recurso, surgiu a proposta de desenvolver um sistema portátil e eficiente capaz de detectar irregularidades no ECG diretamente no dispositivo, utilizando Inteligência Artificial embarcada (IA na borda).
+
+objetivos: Monitorar batimentos cardíacos e Detectar e classificar anomalias utilizando IA na borda
+
+metodologia: Foi desenvolvido, via Edge Impulse, um modelo de IA otimizado para execução no ESP32, permitindo realizar a inferência diretamente no dispositivo de borda.
+1. upload do dataset
+2. treinamento da ia
+3. testes
+
+como funciona ecg:
+ECG é o sinal elétrico, gerado pela despolarização e repolarização do músculo cardíaco
+A variação elétrica do coração se espalha pelo corpo inteiro (água e eletrólitos)
+Os sensores de ECG medem a diferença de tensão na pele.
+
+Complexo QRS
+
+<img width="581" height="455" alt="image" src="https://github.com/user-attachments/assets/9f670531-917c-48fd-b933-45c61eaac8c2" />
+
+sobre o dataset:
+109446 amostras a 125Hz
+5 classificações diferentes: Fusion, Normal, Supraventricular, Unknown, Ventricular
+187 colunas de ECG x 1 coluna de classificação
+1,5 segundos por linha / amostra
+
+sobre a ia:
+A IA foi treinada com ECG filtrado, extraindo espectrograma e features espectrais. O modelo CNN-1D foi treinado com Adam, batches de 64, early stopping e validação separada, aprendendo a classificar 5 tipos de batimentos (tem o arquivo python com o codigo de treinamento usado no edge impulse
+
+Acurácia do modelo
+
+<img width="491" height="121" alt="image" src="https://github.com/user-attachments/assets/4132c486-8c04-4911-baa6-b62a8f34f2ed" />
+
+como rodar o modelo? voce pode checar se os sensores estao funcionando com o esp32_testing_ecg_sensor
+primeiro clone o projeto, dps configure o esp32 pra rodar no ei, dps rode o codigo esp32_ecg_simulator no esp32, dps va para live classification no edge impulse e faça o sampling de 1.5s a 125Hz (ecplique qual o comando no terminal que precisa dar pra fazer os testes no live classification
+
+ou conecta o esp32 no edge impulse e abre o serial monitor no arduino ide e faz os testes por la
+
+exemplo testando no edge impulse
+<img width="805" height="801" alt="image" src="https://github.com/user-attachments/assets/3f82b800-dbb1-4f9c-b39f-5e9c9f92e347" />
+
+exemplos testando direto no serial monitor
+<img width="556" height="317" alt="image" src="https://github.com/user-attachments/assets/215b9a0d-1f0e-4171-9208-2219705ccbe2" />
+<img width="565" height="297" alt="image" src="https://github.com/user-attachments/assets/765c6788-19ba-4136-871b-aa26c10200c9" />
+
+
+fotinha do ecg aparecendo no serial plotter arduino ide
+<img width="622" height="552" alt="image" src="https://github.com/user-attachments/assets/7fb7b2db-6d4b-45d8-8870-22774a41d792" />
+
+
 # Heart Anomaly Detection Using Edge AI
 
-A real-time heartbeat detection system built on Zephyr RTOS with PPG (photoplethysmography) sensor signal processing and biometric analysis.
 
 ---
 
 ## About the Project
 
-This project implements a biometric heartbeat detection system using the Zephyr RTOS. The system acquires analog signals from a PPG sensor, processes the data in real-time to extract heart rate information, and provides accurate BPM (beats per minute) measurements. The application demonstrates Zephyr's capabilities for low-latency signal processing and real-time operations.
 
 ---
 
 ## Technologies Used
 
-- Zephyr RTOS
-- C programming language
-- CMake build system
-- West build tool
-- ESP32 microcontroller
-- ADS1115 high-precision ADC
-- AD8232 ECG (Electrocardiogram) signal conditioning amplifier
-- Real-time biomedical signal processing
 
 ---
 
 ## Prerequisites
 
-Before getting started, ensure you have the following installed:
-
-- Python 3.8 or higher
-- Git
-- CMake 3.13.1 or higher
-- A supported ARM Cortex toolchain
-- Zephyr SDK
-- West tool (Zephyr's meta-tool)
 
 ---
 
@@ -92,212 +131,15 @@ Ensure good skin contact for accurate signal acquisition.
 
 ---
 
-## Installing Zephyr RTOS
-
-Follow these steps to set up Zephyr on your system:
-
-### Step 1: Install West
-
-West is Zephyr's meta-tool that manages the repository and build system.
-
-```bash
-pip install --upgrade west
-```
-
-### Step 2: Initialize Zephyr Workspace
-
-Create a workspace directory and initialize it with Zephyr:
-
-```bash
-mkdir zephyr-workspace
-cd zephyr-workspace
-west init -m https://github.com/zephyrproject-rtos/zephyr.git --mr main
-```
-
-This creates the following structure:
-- `.west/`: Meta-tool configuration
-- `zephyr/`: Zephyr kernel source code
-- `modules/`: Additional Zephyr modules
-
-### Step 3: Update Modules
-
-Fetch and update all dependencies:
-
-```bash
-west update
-```
-
-### Step 4: Install Zephyr SDK
-
-Download and install the Zephyr SDK for your platform:
-
-```bash
-cd ~
-wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.15.2/zephyr-sdk-0.15.2_linux-x86_64.tar.gz
-tar xvf zephyr-sdk-0.15.2_linux-x86_64.tar.gz
-zephyr-sdk-0.15.2/setup.sh
-```
-
-For Windows or macOS, download the appropriate installer from the Zephyr SDK releases.
-
-### Step 5: Set Up Environment
-
-Source the Zephyr environment:
-
-```bash
-cd ~/zephyr-workspace
-source zephyr/zephyr-env.sh
-```
-
-For permanent setup, add this to your shell profile (.bashrc, .zshrc, etc.).
-
----
-
-## Building the Project
-
-### Clone the Repository
-
-```bash
-cd ~/zephyr-workspace
-git clone https://github.com/cyberdebb/Heartbeat-Detection-Using-Zephyr-RTOS.git heartbeat-app
-cd heartbeat-app
-```
-
-### Configure Your Target Board
-
-This project is specifically designed for the ESP32 board. Use:
-
-```bash
-west build -b esp32
-```
-
-If using a specific ESP32 variant, select the appropriate board name:
-
-- `esp32` - Generic ESP32
-- `esp32s3_devkitc` - ESP32-S3
-- `esp32c3_devkitm` - ESP32-C3
-
-### Build with West
-
-Build the application for the ESP32:
-
-```bash
-west build -b esp32
-```
-
-For a clean rebuild:
-
-```bash
-west build -b esp32 --pristine
-```
-
-### Build Output
-
-The compiled firmware will be located in:
-
-```
-build/zephyr/zephyr.elf
-build/zephyr/zephyr.hex
-build/zephyr/zephyr.bin
-```
-
----
-
-## Flashing the Device
-
-After a successful build, flash the firmware to your microcontroller:
-
-```bash
-west flash
-```
-
-The command automatically detects the connected device and uploads the firmware.
-
-For specific device selection:
-
-```bash
-west flash --runner jlink
-```
-
-Supported runners include: jlink, pyocd, openocd, nrfjprog, and others.
-
----
-
-## Monitoring Serial Output
-
-View real-time debug output from the device:
-
-```bash
-west esplog
-```
-
-Or use a serial terminal:
-
-```bash
-screen /dev/ttyACM0 115200
-```
-
-Replace `/dev/ttyACM0` with your device's serial port.
-
----
-
-## Project Configuration
-
-### prj.conf
-
-Main Zephyr configuration file. Key settings for this project:
-
-- ADC peripheral configuration for sensor input
-- Thread/task priorities and stack sizes
-- Logging configuration level
-- Device tree overlay settings
-
-### app.overlay
-
-Device tree overlay file that configures:
-
-- ADC channel mapping for PPG sensor
-- GPIO pins for status indicators
-- UART/serial interface settings
-- Hardware timer configuration
-
-### CMakeLists.txt
-
-Build configuration specifying:
-
-- Source files to compile
-- Include directories
-- Library dependencies
-- Zephyr-specific settings
-
----
-
-## User Application (src)
-
-The src directory contains the main application code:
-
-- I2C communication driver for ADS1115 ADC interaction
-- ADC sampling configuration for reading digitized ECG signals
-- Real-time ECG signal processing from the AD8232 conditioning circuit
-- Heart rate detection algorithm analyzing the digitized waveform
-- Thread-based concurrent acquisition and processing tasks
-- Lead-off detection for electrode contact monitoring
-- Serial communication for outputting heart rate and diagnostic data
-
-The application uses Zephyr threads to run simultaneous tasks: one reading from the ADS1115 via I2C and storing samples, another processing the signal buffer to detect QRS complexes and calculate BPM. This demonstrates Zephyr's real-time capabilities for biomedical signal processing.
-
----
-
 ## Features
 
-- Real-time ECG signal acquisition via ADS1115 I2C ADC
-- AD8232 biomedical signal conditioning for accurate measurements
-- Automatic heartbeat detection and BPM calculation from QRS complexes
-- Low-latency signal processing using Zephyr threads
-- Lead-off detection for electrode contact quality monitoring
-- Configurable sampling rates and detection thresholds
-- Serial output of heart rate and diagnostic information
-- Minimal CPU and power overhead for wearable applications
+
+---
+
+## Authors
+
+Débora Castro: https://github.com/cyberdebb/
+Matheus Francisco: https://github.com/matheus1103
 
 ---
 
