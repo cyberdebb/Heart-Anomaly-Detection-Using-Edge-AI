@@ -13,8 +13,6 @@ Project developed for a college assignment by [Débora Castro](https://github.co
 
 **Public Edge Impulse Project:** [https://studio.edgeimpulse.com/public/841193/live](https://studio.edgeimpulse.com/public/841193/live)
 
-![Serial Monitor Test Output](https://github.com/user-attachments/assets/215b9a0d-1f0e-4171-9208-2219705ccbe2)
-
 ---
 
 ## Table of Contents
