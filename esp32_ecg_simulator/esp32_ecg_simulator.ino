@@ -5,8 +5,6 @@
  * to test the heartbeat classification model.
  *
  * It has 10 samples of each class, randomly selected by pressing 'A'
- *
- * Author: Generated for ianaborda project
  */
 
 #include <ECG-Anomaly-Detecion_inferencing.h>
