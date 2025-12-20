@@ -3,26 +3,13 @@
 This project implements a portable and efficient system for detecting and classifying heart anomalies using embedded Artificial Intelligence (Edge AI). The system uses an ESP32 microcontroller to run a Convolutional Neural Network (CNN) model, enabling real-time ECG signal analysis directly on the edge device.
 
 The AI model is trained to classify heartbeats into five categories based on the MIT-BIH Arrhythmia Dataset:
-*   Normal
-*   Supraventricular Ectopic Beat
-*   Ventricular Ectopic Beat
-*   Fusion Beat
-*   Unknown Beat
-
-Project developed for a college assignment by [Débora Castro](https://github.com/cyberdebb/) and [Matheus Francisco](https://github.com/matheus1103).
+- Normal
+- Supraventricular Ectopic Beat
+- Ventricular Ectopic Beat
+- Fusion Beat
+- Unknown Beat
 
 **Public Edge Impulse Project:** [https://studio.edgeimpulse.com/public/841193/live](https://studio.edgeimpulse.com/public/841193/live)
-
----
-
-## Table of Contents
-- [Features](#features)
-- [Technologies Used](#technologies-used)
-- [AI Model](#ai-model)
-- [Hardware Setup](#hardware-setup)
-- [How to Use](#how-to-use)
-- [Project Structure](#project-structure)
-- [License](#license)
 
 ---
 
@@ -41,9 +28,10 @@ Project developed for a college assignment by [Débora Castro](https://github.co
     - AD8232 ECG Signal Conditioning Amplifier
     - ADS1115 16-bit ADC
 - **Software & Services:**
-    - [Edge Impulse](https://www.edgeimpulse.com/) for model training and deployment.
-    - Arduino IDE for programming the ESP32.
-    - Python with TensorFlow/Keras for model definition.
+    - [Edge Impulse](https://www.edgeimpulse.com/) for model training and deployment
+    - Arduino IDE for programming the ESP32
+    - Windows for development environment
+    - Python with TensorFlow/Keras for model definition
 
 ---
 
@@ -72,6 +60,7 @@ The model is a lightweight 1D Convolutional Neural Network (CNN) designed for ef
 |--------|-------|---------------|
 | **ADS1115** | VCC   | 3V3 ESP32     |
 |        | GND   | GND ESP32     |
+|        | ADDR  | GND ESP32     |
 |        | SCL   | GPIO 22 ESP32 |
 |        | SDA   | GPIO 21 ESP32 |
 |        | A0    | OUTPUT AD8232 |
@@ -95,26 +84,58 @@ git clone https://github.com/cyberdebb/Heart-Anomaly-Detection-Using-Edge-AI.git
 cd Heart-Anomaly-Detection-Using-Edge-AI
 ```
 
-### 2. Test the Model with the ECG Simulator
-The simulator allows you to test the deployed model without needing the physical sensors. It uses pre-recorded data from the [`ecg_samples_10each.h`](esp32_ecg_simulator/ecg_samples_10each.h) file.
+### 2. Configure the ESP32 for Edge Impulse
+Before running the project, you need to set up the ESP32 to work with Edge Impulse. Follow the official Edge Impulse documentation for ESP32 configuration:
 
-1.  Open [`esp32_ecg_simulator/esp32_ecg_simulator.ino`](esp32_ecg_simulator/esp32_ecg_simulator.ino) in the Arduino IDE.
-2.  Select your ESP32 board and port.
-3.  Upload the sketch to your ESP32.
-4.  Open the Serial Monitor at **115200 baud**.
-5.  Use the following commands to run inference:
+**[Edge Impulse ESP32 Setup Guide](https://docs.edgeimpulse.com/hardware/boards/espressif-esp32)**
+
+### 3. Test the ECG Sensor (Optional)
+Before running the model, verify that your AD8232 sensor is working correctly.
+
+1. Open [`esp32_testing_ecg_sensor/esp32_testing_ecg_sensor.ino`](esp32_testing_ecg_sensor/esp32_testing_ecg_sensor.ino) in the Arduino IDE.
+2. Upload the sketch to your ESP32.
+3. Open the **Serial Plotter** (Tools → Serial Plotter) to visualize your live heartbeat data.
+
+![Serial Plotter ECG](https://github.com/user-attachments/assets/7fb7b2db-6d4b-45d8-8870-22774a41d792)
+
+### 4. Test the Model with the ECG Simulator
+The simulator allows you to test the deployed model using pre-recorded data from the [`ecg_samples_10each.h`](esp32_ecg_simulator/ecg_samples_10each.h) file. This is useful for testing without needing physical sensors.
+
+1. Open [`esp32_ecg_simulator/esp32_ecg_simulator.ino`](esp32_ecg_simulator/esp32_ecg_simulator.ino) in the Arduino IDE.
+2. Select your ESP32 board and port.
+3. Upload the sketch to your ESP32.
+4. Open the **Serial Monitor** at **115200 baud**.
+5. Use the following commands to run inference:
     - `A`: Test a random sample from all classes.
     - `T`: Test all 50 available samples sequentially and calculate accuracy.
     - `0`-`9`: Test a specific "Normal" sample.
 
-### 3. Test the ECG Sensor
-Before running a full real-time inference, you can verify that your AD8232 sensor is working correctly.
+### 5. Test with Real-Time Live Classification (Edge Impulse)
+You can also test the model in real-time with actual ECG data using Edge Impulse's Live Classification feature.
 
-1.  Open [`esp32_testing_ecg_sensor/esp32_testing_ecg_sensor.ino`](esp32_testing_ecg_sensor/esp32_testing_ecg_sensor.ino) in the Arduino IDE.
-2.  Upload the sketch to your ESP32.
-3.  Open the **Serial Plotter** (Tools -> Serial Plotter) to visualize your live heartbeat data.
+1. Connect your ESP32 to the Edge Impulse platform (ensure it's configured as per Step 2).
+2. Go to the **Live Classification** section in Edge Impulse.
+3. Configure the sampling settings: **1.5 seconds** of ECG data at **125Hz** sampling rate.
+4. To start sampling via terminal, run the following command:
+   ```
+   edge-impulse-cli --record-development --frequency 125
+   ```
+5. This will collect real-time ECG data from your device and send it to Edge Impulse for live classification results.
 
-![Serial Plotter ECG](https://github.com/user-attachments/assets/7fb7b2db-6d4b-45d8-8870-22774a41d792)
+---
+
+## Dataset
+This project uses the MIT-BIH Arrhythmia Database for training. You can download the dataset here:
+
+**[MIT-BIH Arrhythmia Dataset on Kaggle](https://www.kaggle.com/datasets/shayanfazeli/heartbeat?resource=download)**
+
+---
+
+## Additional Resources
+
+- **ECG Sensor Guide:** [AD8232 Heart Rate Monitor Hookup Guide](https://learn.sparkfun.com/tutorials/ad8232-heart-rate-monitor-hookup-guide/all)
+- **Edge Impulse Documentation:** [https://docs.edgeimpulse.com/](https://docs.edgeimpulse.com/)
+- **Arduino IDE:** [https://www.arduino.cc/en/software](https://www.arduino.cc/en/software)
 
 ---
 
@@ -135,3 +156,10 @@ Before running a full real-time inference, you can verify that your AD8232 senso
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## Authors
+
+* **Débora Castro** - [GitHub](https://github.com/cyberdebb) 
+* **Matheus Francisco** - [GitHub](https://github.com/matheus1103)
